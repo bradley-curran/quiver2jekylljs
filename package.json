@@ -1,0 +1,24 @@
+{
+  "name": "quiver2jekyll",
+  "version": "0.0.1",
+  "main": "src/index.js",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bradley-curran/quiver2jekylljs.git"
+  },
+  "bin": {
+    "quiver2jekyll": "src/quiver2jekyll"
+  },
+  "scripts": {
+    "start": "gulp"
+  },
+  "dependencies": {
+    "commander": "^2.9.0"
+  },
+  "devDependencies": {
+    "eslint": "^3.11.1",
+    "gulp": "^3.9.1",
+    "gulp-eslint": "^3.0.1"
+  }
+}

@@ -1,0 +1,86 @@
+#!/usr/bin/env node
+const fs = require('fs');
+const path = require('path');
+const program = require('commander');
+
+let out = '';
+
+const println = (text) => {
+  if (text !== undefined) {
+    out += text;
+  }
+
+  out += '\n';
+  return println;
+};
+
+const leftpad = (text, length = 2) => {
+  let result = '' + text;
+
+  while (result.length < length) {
+    result = '0' + result;
+  }
+
+  return result;
+};
+
+program
+  .version('1.0.0')
+  .option('-f, --file <filename>', 'convert file')
+  .option('-s, --save', 'save to the current directory');
+
+program.parse(process.argv);
+
+if (!program.file) {
+  console.error('file not specified');
+  program.help();
+}
+
+if (!fs.existsSync(program.file)) {
+  console.error(`${program.file} does not exist`);
+  program.help();
+}
+
+const content = JSON.parse(fs.readFileSync(path.join(program.file, 'content.json')));
+const meta = JSON.parse(fs.readFileSync(path.join(program.file, 'meta.json')));
+
+println('---');
+println('layout: post');
+println(`title: ${meta.title}`);
+
+if (meta.tags.length) {
+  println('tags: ');
+  println(meta.tags.map(tag => `    - ${tag}`).join('\n'));
+}
+
+println('---');
+
+content.cells.forEach((cell) => {
+  println();
+
+  switch (cell.type) {
+  case 'markdown':
+    println(cell.data);
+    break;
+  case 'code':
+    println(`{% highlight ${cell.language} %}`);
+    println(cell.data);
+    println('{% endhighlight %}');
+    break;
+  default:
+    console.error(`cannot handle ${cell.type} cells`);
+    process.exit(1);
+    break;
+  }
+});
+
+if (program.save) {
+  const date = new Date(meta.updated_at * 1000);
+  const words = [];
+  words.push(date.getFullYear(), leftpad(date.getMonth()), leftpad(date.getDate()));
+  words.push(...meta.title.toLowerCase().split(' '));
+  const filename = words.join('-') + '.markdown';
+  fs.writeFileSync(filename, out);
+} else {
+  console.log(out);
+}
